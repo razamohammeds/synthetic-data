@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CSV Upload and Download</title>
+  </head>
+  <body>
+    <h2>Upload CSV and Submit Data</h2>
+    <form id="csvForm" enctype="multipart/form-data">
+      <label for="n_records">Number of Records:</label>
+      <input
+        type="number"
+        id="n_records"
+        name="n_records"
+        required
+      /><br /><br />
+
+      <label for="csvFile">Select CSV File:</label>
+      <input
+        type="file"
+        id="csvFile"
+        name="file"
+        accept=".csv"
+        required
+      /><br /><br />
+
+      <label for="is_headers">Is Header:</label>
+      <select id="is_headers" name="is_headers" required>
+        <option value="true">True</option>
+        <option value="false">False</option></select
+      ><br /><br />
+
+      <button type="submit">Submit</button>
+    </form>
+
+    <br />
+    <button id="downloadButton" style="display: none">Download CSV</button>
+
+    <script>
+      document
+        .getElementById("csvForm")
+        .addEventListener("submit", async function (event) {
+          event.preventDefault();
+
+          const form = document.getElementById("csvForm");
+          const formData = new FormData(form);
+
+          try {
+            // Send the form data to the API
+            const response = await fetch(
+              "https://63f1-2409-4090-201d-ee00-487f-c57b-3281-554a.ngrok-free.app",
+              {
+                method: "POST",
+                body: formData,
+              }
+            );
+
+            if (!response.ok) {
+              throw new Error("Error submitting form: " + response.statusText);
+            }
+
+            // Get CSV response as text
+            const csvText = await response.text();
+
+            // Create a Blob from the CSV text and create a download link
+            const blob = new Blob([csvText], { type: "text/csv" });
+            const downloadLink = document.createElement("a");
+            downloadLink.href = URL.createObjectURL(blob);
+            downloadLink.download = "response.csv"; // Name of the downloaded file
+
+            // Show the download button and set up the click event to download the file
+            const downloadButton = document.getElementById("downloadButton");
+            downloadButton.style.display = "inline-block";
+            downloadButton.onclick = function () {
+              downloadLink.click();
+            };
+          } catch (error) {
+            console.error("Error:", error);
+          }
+        });
+    </script>
+  </body>
+</html>
